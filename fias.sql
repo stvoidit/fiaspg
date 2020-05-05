@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 12.2
+-- Dumped from database version 12.2 (Ubuntu 12.2-2.pgdg18.04+1)
 -- Dumped by pg_dump version 12.2 (Ubuntu 12.2-2.pgdg18.04+1)
 
 SET statement_timeout = 0;
@@ -44,15 +44,15 @@ CREATE EXTENSION IF NOT EXISTS pg_trgm WITH SCHEMA public;
 CREATE FUNCTION public.search_address(adr text) RETURNS TABLE(aoid uuid, address character varying, cadnum character varying, similarity real)
     LANGUAGE sql
     AS $$
-	SELECT 
+    SELECT 
     f.houseid ,
     f.address ,
     f.cadnum ,
-    f.address <<<-> adr AS similarity
+    similarity(f.address,  adr) AS similarity
     FROM fulladdress f 
     WHERE address IS NOT NULL
-    AND lower(address) ILIKE '%' ||  regexp_replace(adr, '[\s,\.\-_*+/\n\r]', '%', 'g')  || '%'
-    ORDER BY similarity asc
+    AND  similarity(f.address,  adr) > 0.3
+    ORDER BY similarity desc
 
 $$;
 
@@ -161,7 +161,7 @@ CREATE MATERIALIZED VIEW public.fulladdress AS
            FROM public.addresses a2
           WHERE (a2.aolevel <= 6)
         )
- SELECT ((((((((((((h.postalcode || ', '::text) || (c.shortname)::text) || ' '::text) || (c.formalname)::text) || ', '::text) || (a.shortname)::text) || ' '::text) || (a.formalname)::text) || ', '::text) || (h.housenum)::text) ||
+ SELECT (((((((((((c.shortname)::text || ' '::text) || (c.formalname)::text) || ', '::text) || (a.shortname)::text) || ' '::text) || (a.formalname)::text) || ', '::text) || (h.housenum)::text) ||
         CASE
             WHEN ((h.structnum)::text <> ''::text) THEN ('c'::text || (h.structnum)::text)
             ELSE ''::text
