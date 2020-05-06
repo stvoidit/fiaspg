@@ -100,6 +100,279 @@ CREATE TABLE public.addresses (
 
 
 --
+-- Name: addresses_1; Type: VIEW; Schema: public; Owner: -
+--
+
+CREATE VIEW public.addresses_1 AS
+ SELECT addresses.aoid,
+    addresses.aoguid,
+    addresses.parentguid,
+    addresses.nextid,
+    addresses.previd,
+    addresses.formalname,
+    addresses.offname,
+    addresses.shortname,
+    addresses.aolevel,
+    addresses.regioncode,
+    addresses.areacode,
+    addresses.autocode,
+    addresses.citycode,
+    addresses.ctarcode,
+    addresses.placecode,
+    addresses.streetcode,
+    addresses.extracode,
+    addresses.sextcode,
+    addresses.plaincode,
+    addresses.code,
+    addresses.curstatus,
+    addresses.actstatus,
+    addresses.livestatus,
+    addresses.centstatus,
+    addresses.operstatus,
+    addresses.okato,
+    addresses.oktmo,
+    addresses.postalcode,
+    addresses.divtype,
+    addresses.plancode
+   FROM public.addresses
+  WHERE (addresses.aolevel = 1);
+
+
+--
+-- Name: addresses_3; Type: VIEW; Schema: public; Owner: -
+--
+
+CREATE VIEW public.addresses_3 AS
+ SELECT addresses.aoid,
+    addresses.aoguid,
+    addresses.parentguid,
+    addresses.nextid,
+    addresses.previd,
+    addresses.formalname,
+    addresses.offname,
+    addresses.shortname,
+    addresses.aolevel,
+    addresses.regioncode,
+    addresses.areacode,
+    addresses.autocode,
+    addresses.citycode,
+    addresses.ctarcode,
+    addresses.placecode,
+    addresses.streetcode,
+    addresses.extracode,
+    addresses.sextcode,
+    addresses.plaincode,
+    addresses.code,
+    addresses.curstatus,
+    addresses.actstatus,
+    addresses.livestatus,
+    addresses.centstatus,
+    addresses.operstatus,
+    addresses.okato,
+    addresses.oktmo,
+    addresses.postalcode,
+    addresses.divtype,
+    addresses.plancode
+   FROM public.addresses
+  WHERE (addresses.aolevel = 3);
+
+
+--
+-- Name: addresses_4; Type: VIEW; Schema: public; Owner: -
+--
+
+CREATE VIEW public.addresses_4 AS
+ SELECT addresses.aoid,
+    addresses.aoguid,
+    addresses.parentguid,
+    addresses.nextid,
+    addresses.previd,
+    addresses.formalname,
+    addresses.offname,
+    addresses.shortname,
+    addresses.aolevel,
+    addresses.regioncode,
+    addresses.areacode,
+    addresses.autocode,
+    addresses.citycode,
+    addresses.ctarcode,
+    addresses.placecode,
+    addresses.streetcode,
+    addresses.extracode,
+    addresses.sextcode,
+    addresses.plaincode,
+    addresses.code,
+    addresses.curstatus,
+    addresses.actstatus,
+    addresses.livestatus,
+    addresses.centstatus,
+    addresses.operstatus,
+    addresses.okato,
+    addresses.oktmo,
+    addresses.postalcode,
+    addresses.divtype,
+    addresses.plancode
+   FROM public.addresses
+  WHERE (addresses.aolevel = 4);
+
+
+--
+-- Name: addresses_5; Type: VIEW; Schema: public; Owner: -
+--
+
+CREATE VIEW public.addresses_5 AS
+ SELECT addresses.aoid,
+    addresses.aoguid,
+    addresses.parentguid,
+    addresses.nextid,
+    addresses.previd,
+    addresses.formalname,
+    addresses.offname,
+    addresses.shortname,
+    addresses.aolevel,
+    addresses.regioncode,
+    addresses.areacode,
+    addresses.autocode,
+    addresses.citycode,
+    addresses.ctarcode,
+    addresses.placecode,
+    addresses.streetcode,
+    addresses.extracode,
+    addresses.sextcode,
+    addresses.plaincode,
+    addresses.code,
+    addresses.curstatus,
+    addresses.actstatus,
+    addresses.livestatus,
+    addresses.centstatus,
+    addresses.operstatus,
+    addresses.okato,
+    addresses.oktmo,
+    addresses.postalcode,
+    addresses.divtype,
+    addresses.plancode
+   FROM public.addresses
+  WHERE (addresses.aolevel = 5);
+
+
+--
+-- Name: addresses_6; Type: VIEW; Schema: public; Owner: -
+--
+
+CREATE VIEW public.addresses_6 AS
+ SELECT addresses.aoid,
+    addresses.aoguid,
+    addresses.parentguid,
+    addresses.nextid,
+    addresses.previd,
+    addresses.formalname,
+    addresses.offname,
+    addresses.shortname,
+    addresses.aolevel,
+    addresses.regioncode,
+    addresses.areacode,
+    addresses.autocode,
+    addresses.citycode,
+    addresses.ctarcode,
+    addresses.placecode,
+    addresses.streetcode,
+    addresses.extracode,
+    addresses.sextcode,
+    addresses.plaincode,
+    addresses.code,
+    addresses.curstatus,
+    addresses.actstatus,
+    addresses.livestatus,
+    addresses.centstatus,
+    addresses.operstatus,
+    addresses.okato,
+    addresses.oktmo,
+    addresses.postalcode,
+    addresses.divtype,
+    addresses.plancode
+   FROM public.addresses
+  WHERE (addresses.aolevel = 6);
+
+
+--
+-- Name: addresses_65; Type: VIEW; Schema: public; Owner: -
+--
+
+CREATE VIEW public.addresses_65 AS
+ SELECT addresses.aoid,
+    addresses.aoguid,
+    addresses.parentguid,
+    addresses.nextid,
+    addresses.previd,
+    addresses.formalname,
+    addresses.offname,
+    addresses.shortname,
+    addresses.aolevel,
+    addresses.regioncode,
+    addresses.areacode,
+    addresses.autocode,
+    addresses.citycode,
+    addresses.ctarcode,
+    addresses.placecode,
+    addresses.streetcode,
+    addresses.extracode,
+    addresses.sextcode,
+    addresses.plaincode,
+    addresses.code,
+    addresses.curstatus,
+    addresses.actstatus,
+    addresses.livestatus,
+    addresses.centstatus,
+    addresses.operstatus,
+    addresses.okato,
+    addresses.oktmo,
+    addresses.postalcode,
+    addresses.divtype,
+    addresses.plancode
+   FROM public.addresses
+  WHERE (addresses.aolevel = 65);
+
+
+--
+-- Name: addresses_7; Type: VIEW; Schema: public; Owner: -
+--
+
+CREATE VIEW public.addresses_7 AS
+ SELECT addresses.aoid,
+    addresses.aoguid,
+    addresses.parentguid,
+    addresses.nextid,
+    addresses.previd,
+    addresses.formalname,
+    addresses.offname,
+    addresses.shortname,
+    addresses.aolevel,
+    addresses.regioncode,
+    addresses.areacode,
+    addresses.autocode,
+    addresses.citycode,
+    addresses.ctarcode,
+    addresses.placecode,
+    addresses.streetcode,
+    addresses.extracode,
+    addresses.sextcode,
+    addresses.plaincode,
+    addresses.code,
+    addresses.curstatus,
+    addresses.actstatus,
+    addresses.livestatus,
+    addresses.centstatus,
+    addresses.operstatus,
+    addresses.okato,
+    addresses.oktmo,
+    addresses.postalcode,
+    addresses.divtype,
+    addresses.plancode
+   FROM public.addresses
+  WHERE (addresses.aolevel = 7);
+
+
+--
 -- Name: eststats; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -220,7 +493,7 @@ CREATE INDEX addresses_aoid_idx ON public.addresses USING btree (aoid);
 -- Name: addresses_aolevel_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX addresses_aolevel_idx ON public.addresses USING btree (aolevel);
+CREATE INDEX addresses_aolevel_idx ON public.addresses USING btree (aolevel, shortname);
 
 
 --
@@ -231,10 +504,24 @@ CREATE INDEX addresses_formalname_idx_gin ON public.addresses USING gin (formaln
 
 
 --
+-- Name: addresses_parentguid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX addresses_parentguid_idx ON public.addresses USING btree (parentguid);
+
+
+--
 -- Name: addresses_regioncode_idx; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX addresses_regioncode_idx ON public.addresses USING btree (regioncode);
+
+
+--
+-- Name: eststats_estatid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX eststats_estatid_idx ON public.eststats USING btree (estatid);
 
 
 --
@@ -270,6 +557,13 @@ CREATE INDEX houses_houseid_idx ON public.houses USING btree (houseid);
 --
 
 CREATE INDEX houses_regioncode_idx ON public.houses USING btree (regioncode);
+
+
+--
+-- Name: socrbase_level_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX socrbase_level_idx ON public.socrbase USING btree (level, scname);
 
 
 --
