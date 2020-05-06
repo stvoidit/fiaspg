@@ -3,6 +3,7 @@ package fiaspg
 import (
 	"context"
 	"fmt"
+	"sync"
 
 	"github.com/jackc/pgx/v4"
 )
@@ -10,6 +11,7 @@ import (
 // DB - ...
 type DB struct {
 	conn *pgx.Conn
+	lock *sync.Mutex
 }
 
 // NewStore - ...
@@ -24,11 +26,13 @@ func NewStore(host, port, login, password, dbname string) (*DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &DB{conn}, nil
+	return &DB{conn, new(sync.Mutex)}, nil
 }
 
 // InsertAddresses - добавление адреса
 func (db *DB) InsertAddresses(adrs ...Address) {
+	db.lock.Lock()
+	defer db.lock.Unlock()
 	const q = `INSERT
     INTO
     addresses (
@@ -108,6 +112,8 @@ func (db *DB) InsertAddresses(adrs ...Address) {
 
 // InsertHouses - ...
 func (db *DB) InsertHouses(houses ...House) {
+	db.lock.Lock()
+	defer db.lock.Unlock()
 	const q = `INSERT
     INTO
     houses (
@@ -147,6 +153,42 @@ func (db *DB) InsertHouses(houses ...House) {
 			h.REGIONCODE,
 			nullString(h.CADNUM),
 		)
+	}
+	result := db.conn.SendBatch(context.Background(), b)
+	if _, err := result.Exec(); err != nil {
+		panic(err)
+	}
+	result.Close()
+}
+
+// InsertEststats - ...
+func (db *DB) InsertEststats(eststats ...EstateStatus) {
+	db.lock.Lock()
+	defer db.lock.Unlock()
+	var q = `INSERT INTO eststats
+	(estatid, "name", shortname)
+	VALUES($1,$2,$3)`
+	var b = new(pgx.Batch)
+	for _, e := range eststats {
+		b.Queue(q, e.ESTSTATID, e.NAME, e.SHORTNAME)
+	}
+	result := db.conn.SendBatch(context.Background(), b)
+	if _, err := result.Exec(); err != nil {
+		panic(err)
+	}
+	result.Close()
+}
+
+// InsertSocrbase - ...
+func (db *DB) InsertSocrbase(socrbs ...Socrbase) {
+	db.lock.Lock()
+	defer db.lock.Unlock()
+	var q = `INSERT INTO socrbase
+	("level", socrname, scname, code)
+	VALUES($1,$2,$3,$4)`
+	var b = new(pgx.Batch)
+	for _, s := range socrbs {
+		b.Queue(q, s.LEVEL, s.SOCRNAME, s.SCNAME, s.KODTST)
 	}
 	result := db.conn.SendBatch(context.Background(), b)
 	if _, err := result.Exec(); err != nil {
