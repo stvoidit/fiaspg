@@ -100,6 +100,17 @@ CREATE TABLE public.addresses (
 
 
 --
+-- Name: eststats; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.eststats (
+    estatid integer NOT NULL,
+    name character varying NOT NULL,
+    shortname character varying NOT NULL
+);
+
+
+--
 -- Name: houses; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -177,6 +188,18 @@ CREATE MATERIALIZED VIEW public.fulladdress AS
      JOIN public.houses h ON ((h.aoguid = a.aoguid)))
   WHERE (a.aolevel >= 7)
   WITH NO DATA;
+
+
+--
+-- Name: socrbase; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.socrbase (
+    level integer NOT NULL,
+    socrname character varying NOT NULL,
+    scname character varying NOT NULL,
+    code integer NOT NULL
+);
 
 
 --
