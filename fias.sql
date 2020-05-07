@@ -44,8 +44,6 @@ CREATE EXTENSION IF NOT EXISTS pg_trgm WITH SCHEMA public;
 CREATE FUNCTION public.search_guid(addr text) RETURNS TABLE(houseid uuid, house text, similarity real)
     LANGUAGE sql
     AS $$
---    SET pg_trgm.word_similarity_threshold = th;
-
 WITH primary_selection AS (
 SELECT DISTINCT a.aoguid, a.parentguid, a.shortname, a.offname, a.aolevel  FROM addresses a 
 INNER JOIN houses h ON h.aoguid = a.aoguid 
@@ -69,22 +67,15 @@ CASE WHEN h.structnum IS NOT NULL THEN concat('стр ', h.structnum) ELSE '' EN
 INNER JOIN primary_selection ps ON ps.parentguid = ss.aoguid
 INNER JOIN houses h ON h.aoguid = ps.aoguid 
 INNER JOIN eststats e ON e.estatid = h.eststatus 
-
 )
-
-
 
 SELECT
 hs.houseid,
 hs.house,
-word_similarity(addr, (concat(hs.city,', ' ,hs.street,', ' ,hs.house)))
+similarity(addr, (concat(hs.city,', ' ,hs.street,', ' ,hs.house)))
 FROM houses_selection hs
 WHERE concat(hs.city,', ' ,hs.street,', ' ,hs.house) %> addr
-ORDER BY word_similarity(addr, (concat(hs.city,', ' ,hs.street,', ' ,hs.house))) desc
-
-
-
-
+ORDER BY similarity(addr, (concat(hs.city,', ' ,hs.street,', ' ,hs.house))) desc
 
 $$;
 
