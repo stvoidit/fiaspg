@@ -41,7 +41,7 @@ CREATE EXTENSION IF NOT EXISTS pg_trgm WITH SCHEMA public;
 -- Name: search_guid(text); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE FUNCTION public.search_guid(addr text) RETURNS TABLE(houseid uuid, house text, similarity real)
+CREATE FUNCTION public.search_guid(addr text) RETURNS TABLE(houseid uuid, address text, similarity real)
     LANGUAGE sql
     AS $$
 WITH primary_selection AS (
@@ -67,15 +67,25 @@ CASE WHEN h.structnum IS NOT NULL THEN concat('стр ', h.structnum) ELSE '' EN
 INNER JOIN primary_selection ps ON ps.parentguid = ss.aoguid
 INNER JOIN houses h ON h.aoguid = ps.aoguid 
 INNER JOIN eststats e ON e.estatid = h.eststatus 
-)
-
+), founded AS (
 SELECT
 hs.houseid,
-hs.house,
-similarity(addr, (concat(hs.city,', ' ,hs.street,', ' ,hs.house)))
+fa.address,
+strict_word_similarity(fa.address , addr ) AS similarity
 FROM houses_selection hs
-WHERE concat(hs.city,', ' ,hs.street,', ' ,hs.house) %> addr
-ORDER BY similarity(addr, (concat(hs.city,', ' ,hs.street,', ' ,hs.house))) desc
+INNER JOIN fulladdresses fa ON fa.houseid = hs.houseid
+WHERE fa.address %>> addr
+)
+
+SELECT 
+DISTINCT ON (f.address)
+f.houseid
+,f.address
+,f.similarity
+
+FROM founded AS f
+WHERE f.similarity = (SELECT max(similarity) FROM founded)
+
 
 $$;
 
@@ -475,7 +485,20 @@ CREATE MATERIALIZED VIEW public.fulladdresses AS
         CASE
             WHEN (h.structnum IS NOT NULL) THEN concat('стр ', h.structnum)
             ELSE ''::text
-        END))) AS address
+        END))) AS address,
+    btrim(concat(
+        CASE
+            WHEN (h.housenum IS NOT NULL) THEN concat(' ', e.shortname, h.housenum, ' ')
+            ELSE ''::text
+        END,
+        CASE
+            WHEN (h.buildnum IS NOT NULL) THEN concat('к ', h.buildnum, ' ')
+            ELSE ''::text
+        END,
+        CASE
+            WHEN (h.structnum IS NOT NULL) THEN concat('стр ', h.structnum)
+            ELSE ''::text
+        END)) AS house
    FROM ((((((((public.houses h
      JOIN public.eststats e ON ((e.estatid = h.eststatus)))
      JOIN public.addresses a1 ON ((a1.aoguid = h.aoguid)))
@@ -529,6 +552,13 @@ CREATE INDEX addresses_formalname_idx_gin ON public.addresses USING gin (formaln
 
 
 --
+-- Name: addresses_idx_gin; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX addresses_idx_gin ON public.fulladdresses USING gin (address);
+
+
+--
 -- Name: addresses_offname_idx_gin; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -561,6 +591,13 @@ CREATE INDEX eststats_estatid_idx ON public.eststats USING btree (estatid);
 --
 
 CREATE INDEX fulladdresses_houseid_idx ON public.fulladdresses USING btree (houseid);
+
+
+--
+-- Name: house_idx_gin; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX house_idx_gin ON public.fulladdresses USING gin (house);
 
 
 --
