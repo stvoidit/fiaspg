@@ -38,21 +38,53 @@ CREATE EXTENSION IF NOT EXISTS pg_trgm WITH SCHEMA public;
 
 
 --
--- Name: search_address(text); Type: FUNCTION; Schema: public; Owner: -
+-- Name: search_guid(text); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE FUNCTION public.search_address(adr text) RETURNS TABLE(aoid uuid, address character varying, cadnum character varying, similarity real)
+CREATE FUNCTION public.search_guid(addr text) RETURNS TABLE(houseid uuid, house text, similarity real)
     LANGUAGE sql
     AS $$
+--    SET pg_trgm.word_similarity_threshold = th;
+
+WITH primary_selection AS (
+SELECT DISTINCT a.aoguid, a.parentguid, a.shortname, a.offname, a.aolevel  FROM addresses a 
+INNER JOIN houses h ON h.aoguid = a.aoguid 
+WHERE (addr %> concat_ws(' ',a.shortname , a.offname)) IS TRUE 
+AND a.aolevel > 6
+), secondary_selection AS (
+SELECT * FROM addresses a2 
+WHERE a2.aoguid IN (SELECT parentguid FROM primary_selection)
+AND (addr %> a2.offname) IS TRUE 
+
+), houses_selection as (
     SELECT 
-    f.houseid ,
-    f.address ,
-    f.cadnum ,
-    similarity(f.address,  adr) AS similarity
-    FROM fulladdress f 
-    WHERE address IS NOT NULL
-    AND  similarity(f.address,  adr) > 0.3
-    ORDER BY similarity desc
+    concat_ws(' ',ss.shortname , ss.offname) AS city,
+    concat_ws(' ',ps.shortname , ps.offname) AS street,
+ h.houseid, trim(concat_ws(' ',
+CASE WHEN h.housenum IS NOT NULL THEN concat_ws(' ', e.shortname, h.housenum) ELSE '' END,
+CASE WHEN h.buildnum IS NOT NULL THEN concat('к ', h.buildnum ) ELSE '' END,
+CASE WHEN h.structnum IS NOT NULL THEN concat('стр ', h.structnum) ELSE '' END
+)) AS house
+ FROM secondary_selection ss
+INNER JOIN primary_selection ps ON ps.parentguid = ss.aoguid
+INNER JOIN houses h ON h.aoguid = ps.aoguid 
+INNER JOIN eststats e ON e.estatid = h.eststatus 
+
+)
+
+
+
+SELECT
+hs.houseid,
+hs.house,
+word_similarity(addr, (concat(hs.city,', ' ,hs.street,', ' ,hs.house)))
+FROM houses_selection hs
+WHERE concat(hs.city,', ' ,hs.street,', ' ,hs.house) %> addr
+ORDER BY word_similarity(addr, (concat(hs.city,', ' ,hs.street,', ' ,hs.house))) desc
+
+
+
+
 
 $$;
 
