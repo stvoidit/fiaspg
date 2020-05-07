@@ -430,59 +430,61 @@ CREATE TABLE public.houses (
 
 
 --
--- Name: fulladdress; Type: MATERIALIZED VIEW; Schema: public; Owner: -
+-- Name: fulladdresses; Type: MATERIALIZED VIEW; Schema: public; Owner: -
 --
 
-CREATE MATERIALIZED VIEW public.fulladdress AS
- WITH citys AS (
-         SELECT a2.aoid,
-            a2.aoguid,
-            a2.parentguid,
-            a2.nextid,
-            a2.previd,
-            a2.formalname,
-            a2.offname,
-            a2.shortname,
-            a2.aolevel,
-            a2.regioncode,
-            a2.areacode,
-            a2.autocode,
-            a2.citycode,
-            a2.ctarcode,
-            a2.placecode,
-            a2.streetcode,
-            a2.extracode,
-            a2.sextcode,
-            a2.plaincode,
-            a2.code,
-            a2.curstatus,
-            a2.actstatus,
-            a2.livestatus,
-            a2.centstatus,
-            a2.operstatus,
-            a2.okato,
-            a2.oktmo,
-            a2.postalcode,
-            a2.divtype,
-            a2.plancode
-           FROM public.addresses a2
-          WHERE (a2.aolevel <= 6)
-        )
- SELECT (((((((((((c.shortname)::text || ' '::text) || (c.formalname)::text) || ', '::text) || (a.shortname)::text) || ' '::text) || (a.formalname)::text) || ', '::text) || (h.housenum)::text) ||
+CREATE MATERIALIZED VIEW public.fulladdresses AS
+ SELECT h.houseid,
+    concat(
         CASE
-            WHEN ((h.structnum)::text <> ''::text) THEN ('c'::text || (h.structnum)::text)
+            WHEN (a7.shortname IS NOT NULL) THEN (concat_ws(' '::text, a7.shortname, a7.offname) || ', '::text)
             ELSE ''::text
-        END) ||
+        END,
         CASE
-            WHEN ((h.buildnum)::text <> ''::text) THEN ('к'::text || (h.buildnum)::text)
+            WHEN (a6.shortname IS NOT NULL) THEN (concat_ws(' '::text, a6.shortname, a6.offname) || ', '::text)
             ELSE ''::text
-        END) AS address,
-    h.houseid,
-    h.cadnum
-   FROM ((public.addresses a
-     LEFT JOIN citys c ON ((c.aoguid = a.parentguid)))
-     JOIN public.houses h ON ((h.aoguid = a.aoguid)))
-  WHERE (a.aolevel >= 7)
+        END,
+        CASE
+            WHEN (a5.shortname IS NOT NULL) THEN (concat_ws(' '::text, a5.shortname, a5.offname) || ', '::text)
+            ELSE ''::text
+        END,
+        CASE
+            WHEN (a4.shortname IS NOT NULL) THEN (concat_ws(' '::text, a4.shortname, a4.offname) || ', '::text)
+            ELSE ''::text
+        END,
+        CASE
+            WHEN (a3.shortname IS NOT NULL) THEN (concat_ws(' '::text, a3.shortname, a3.offname) || ', '::text)
+            ELSE ''::text
+        END,
+        CASE
+            WHEN (a2.shortname IS NOT NULL) THEN (concat_ws(' '::text, a2.shortname, a2.offname) || ', '::text)
+            ELSE ''::text
+        END,
+        CASE
+            WHEN (a1.shortname IS NOT NULL) THEN (concat_ws(' '::text, a1.shortname, a1.offname) || ', '::text)
+            ELSE ''::text
+        END, btrim(concat(
+        CASE
+            WHEN (h.housenum IS NOT NULL) THEN concat(' ', e.shortname, h.housenum, ' ')
+            ELSE ''::text
+        END,
+        CASE
+            WHEN (h.buildnum IS NOT NULL) THEN concat('к ', h.buildnum, ' ')
+            ELSE ''::text
+        END,
+        CASE
+            WHEN (h.structnum IS NOT NULL) THEN concat('стр ', h.structnum)
+            ELSE ''::text
+        END))) AS address
+   FROM ((((((((public.houses h
+     JOIN public.eststats e ON ((e.estatid = h.eststatus)))
+     JOIN public.addresses a1 ON ((a1.aoguid = h.aoguid)))
+     LEFT JOIN public.addresses a2 ON ((a2.aoguid = a1.parentguid)))
+     LEFT JOIN public.addresses a3 ON ((a3.aoguid = a2.parentguid)))
+     LEFT JOIN public.addresses a4 ON ((a4.aoguid = a3.parentguid)))
+     LEFT JOIN public.addresses a5 ON ((a5.aoguid = a4.parentguid)))
+     LEFT JOIN public.addresses a6 ON ((a6.aoguid = a5.parentguid)))
+     LEFT JOIN public.addresses a7 ON ((a7.aoguid = a6.parentguid)))
   WITH NO DATA;
 
 
@@ -527,6 +529,13 @@ CREATE INDEX addresses_formalname_idx_gin ON public.addresses USING gin (formaln
 
 
 --
+-- Name: addresses_offname_idx_gin; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX addresses_offname_idx_gin ON public.addresses USING gin (offname);
+
+
+--
 -- Name: addresses_parentguid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -548,17 +557,10 @@ CREATE INDEX eststats_estatid_idx ON public.eststats USING btree (estatid);
 
 
 --
--- Name: fulladdress_address_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: fulladdresses_houseid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX fulladdress_address_idx ON public.fulladdress USING gin (address);
-
-
---
--- Name: fulladdress_address_idx_btree; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX fulladdress_address_idx_btree ON public.fulladdress USING btree (address);
+CREATE INDEX fulladdresses_houseid_idx ON public.fulladdresses USING btree (houseid);
 
 
 --
