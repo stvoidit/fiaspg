@@ -71,7 +71,7 @@ INNER JOIN eststats e ON e.estatid = h.eststatus
 SELECT
 hs.houseid,
 fa.address,
-(word_similarity(fa.address , addr ) + similarity(fa.address , addr )) / 2 AS avg_percent
+(word_similarity(fa.address , addr ) + similarity(fa.address , addr ) + strict_word_similarity(fa.address , addr)) / 3 AS avg_percent
 FROM houses_selection hs
 INNER JOIN fulladdresses fa ON fa.houseid = hs.houseid
 
@@ -84,6 +84,52 @@ f.houseid
 ,f.avg_percent::float4
 FROM founded AS f
 WHERE f.avg_percent = (SELECT max(avg_percent) FROM founded)
+LIMIT 1 --TODO: временный костыль
+
+$$;
+
+
+--
+-- Name: search_guid_by_street(text); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.search_guid_by_street(addr text) RETURNS TABLE(houseid uuid, address text, avg_percent real)
+    LANGUAGE sql
+    AS $$
+WITH primary_selection AS (
+SELECT DISTINCT a.aoguid, a.parentguid, a.shortname, a.offname, a.aolevel  FROM addresses a 
+INNER JOIN houses h ON h.aoguid = a.aoguid 
+WHERE (addr %> concat_ws(' ',a.shortname , a.offname)) IS TRUE 
+AND a.aolevel > 6
+), houses_selection as (
+    SELECT 
+    concat_ws(' ',ps.shortname , ps.offname) AS street,
+ h.houseid, trim(concat_ws(' ',
+CASE WHEN h.housenum IS NOT NULL THEN concat_ws(' ', e.shortname, h.housenum) ELSE '' END,
+CASE WHEN h.buildnum IS NOT NULL THEN concat('к ', h.buildnum ) ELSE '' END,
+CASE WHEN h.structnum IS NOT NULL THEN concat('стр ', h.structnum) ELSE '' END
+)) AS house
+ FROM primary_selection ps
+INNER JOIN houses h ON h.aoguid = ps.aoguid 
+INNER JOIN eststats e ON e.estatid = h.eststatus 
+), founded AS (
+SELECT
+hs.houseid,
+fa.address,
+(word_similarity(fa.address , addr ) + similarity(fa.address , addr ) + strict_word_similarity(fa.address , addr)) / 3 AS avg_percent
+FROM houses_selection hs
+INNER JOIN fulladdresses fa ON fa.houseid = hs.houseid
+
+)
+
+SELECT 
+DISTINCT ON (f.address)
+f.houseid
+,f.address
+,f.avg_percent::float4
+FROM founded AS f
+WHERE f.avg_percent = (SELECT max(avg_percent) FROM founded)
+LIMIT 1 --TODO: временный костыль
 
 $$;
 
