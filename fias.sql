@@ -41,14 +41,14 @@ CREATE EXTENSION IF NOT EXISTS pg_trgm WITH SCHEMA public;
 -- Name: search_guid(text); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE FUNCTION public.search_guid(addr text) RETURNS TABLE(houseid uuid, address text, similarity real)
+CREATE FUNCTION public.search_guid(addr text) RETURNS TABLE(houseid uuid, address text, avg_percent real)
     LANGUAGE sql
     AS $$
 WITH primary_selection AS (
 SELECT DISTINCT a.aoguid, a.parentguid, a.shortname, a.offname, a.aolevel  FROM addresses a 
 INNER JOIN houses h ON h.aoguid = a.aoguid 
 WHERE (addr %> concat_ws(' ',a.shortname , a.offname)) IS TRUE 
-AND a.aolevel > 6
+AND a.aolevel >= 6
 ), secondary_selection AS (
 SELECT * FROM addresses a2 
 WHERE a2.aoguid IN (SELECT parentguid FROM primary_selection)
@@ -71,21 +71,19 @@ INNER JOIN eststats e ON e.estatid = h.eststatus
 SELECT
 hs.houseid,
 fa.address,
-strict_word_similarity(fa.address , addr ) AS similarity
+(word_similarity(fa.address , addr ) + similarity(fa.address , addr )) / 2 AS avg_percent
 FROM houses_selection hs
 INNER JOIN fulladdresses fa ON fa.houseid = hs.houseid
-WHERE fa.address %>> addr
+
 )
 
 SELECT 
 DISTINCT ON (f.address)
 f.houseid
 ,f.address
-,f.similarity
-
+,f.avg_percent::float4
 FROM founded AS f
-WHERE f.similarity = (SELECT max(similarity) FROM founded)
-
+WHERE f.avg_percent = (SELECT max(avg_percent) FROM founded)
 
 $$;
 
