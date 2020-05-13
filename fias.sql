@@ -38,6 +38,53 @@ CREATE EXTENSION IF NOT EXISTS pg_trgm WITH SCHEMA public;
 
 
 --
+-- Name: search_by_lvl(text, integer); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.search_by_lvl(addr text, lvl integer) RETURNS text
+    LANGUAGE sql
+    AS $$ WITH result_string AS (
+    SELECT
+        concat_address AS part
+        , (similarity(
+            concat_address
+            , addr
+        ) + word_similarity(
+            concat_address
+            , addr
+        ) + strict_word_similarity(
+            concat_address
+            , addr
+        )) AS similarity
+    FROM
+        addresses a
+    WHERE
+        a.aolevel = lvl
+    AND (
+    concat_address  <% addr
+    OR
+    concat_address % addr 
+    OR
+    concat_address %> addr 
+    )
+)
+SELECT
+    part
+FROM
+    result_string rs
+WHERE
+    rs.similarity = (
+        SELECT
+            max(similarity)
+        FROM
+            result_string
+    )
+LIMIT 1
+
+$$;
+
+
+--
 -- Name: search_guid(text); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -172,7 +219,8 @@ CREATE TABLE public.addresses (
     oktmo character varying(11),
     postalcode character varying(6),
     divtype smallint,
-    plancode integer
+    plancode integer,
+    concat_address character varying(200)
 );
 
 
@@ -624,6 +672,13 @@ CREATE INDEX addresses_regioncode_idx ON public.addresses USING btree (regioncod
 
 
 --
+-- Name: concat_addr_idx_gin; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX concat_addr_idx_gin ON public.addresses USING gin (concat_address);
+
+
+--
 -- Name: eststats_estatid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -663,6 +718,13 @@ CREATE INDEX houses_houseid_idx ON public.houses USING btree (houseid);
 --
 
 CREATE INDEX houses_regioncode_idx ON public.houses USING btree (regioncode);
+
+
+--
+-- Name: shortname_idx_gin; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX shortname_idx_gin ON public.addresses USING gin (shortname);
 
 
 --
